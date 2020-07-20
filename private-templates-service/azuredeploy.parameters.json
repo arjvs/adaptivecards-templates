@@ -3,28 +3,19 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "sites_adaptivecms_name": {
-      "value": null
+      "value": "arjvsacms"
     },
-    "server_farm_id": {
-      "value": null
+    "azure_active_directory_app_registration_id": {
+      "value": "f511cded-f61d-40ab-9f72-38ec7138cb59"
     },
-    "mongodb_connection_string": {
-      "value": null
+    "app_service_plan_subscription": {
+      "value": "plan-linux-ACMS"
     },
-    "app_id": {
-      "value": null
+    "telemetry_opt_in": {
+      "value": "No"
     },
-    "docker_registry_server_uri": {
-      "value": null
-    },
-    "docker_registry_server_username": {
-      "value": null
-    },
-    "docker_registry_server_password": {
-      "value": null
-    },
-    "application_insights_instrumentation_key": {
-      "value": null
+    "cosmos_database_name": {
+      "value": "arjvsacms1"
     }
   }
 }
