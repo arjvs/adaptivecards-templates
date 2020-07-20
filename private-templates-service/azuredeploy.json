@@ -34,18 +34,25 @@
   "variables": {
     "linuxFxVersion": "DOCKER|gracez72/acms:1.0",
     "appInsightsInstrumentationKey": "931c613f-fdcb-40a9-bd39-314ce31bc5d6",
+    "skuCode": "S1",
+    "hostingPlanNameLinux": "plan-linux-ACMS",
     "databaseName": "acms",
     "docker_registry_server_url": "https://index.docker.io"
   },
   "resources": [
+    // Create Site
     {
-      "type": "Microsoft.Web/sites",
       "apiVersion": "2018-11-01",
       "name": "[parameters('sites_adaptivecms_name')]",
+      "type": "Microsoft.Web/sites",
       "location": "[parameters('siteLocation')]",
       "kind": "app,linux,container",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms/', variables('hostingPlanNameLinux'))]"
+      ],
       "properties": {
-        "serverFarmId": "[parameters('app_service_plan_subscription')]"
+        //"serverFarmId": "[parameters('app_service_plan_subscription')]"
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanNameLinux'))]"
       },
       "resources": [
         {
@@ -67,6 +74,23 @@
         }
       ]
     },
+    // Create Server Farm  
+    {
+      "apiVersion": "2018-02-01",
+      "name": "[variables('hostingPlanNameLinux')]",
+      "type": "Microsoft.Web/serverfarms",
+      "location": "[parameters('siteLocation')]",
+      "kind": "linux",
+      "sku": {
+        "Name": "[variables('skuCode')]"
+      },
+      "properties": {
+        "name": "[variables('hostingPlanNameLinux')]",
+        "numberOfWorkers": "1",
+        "reserved": true
+      }
+    },
+    // Site Config Setup
     {
       "type": "Microsoft.Web/sites/config",
       "apiVersion": "2018-11-01",
@@ -136,6 +160,7 @@
         "reservedInstanceCount": 0
       }
     },
+    // Mongo Database Creation
     {
       "type": "Microsoft.DocumentDB/databaseAccounts",
       "name": "[parameters('cosmos_database_name')]",
@@ -169,6 +194,7 @@
         "disableKeyBasedMetadataWriteAccess": false
       }
     },
+    // Mongo database container creation
     {
       "type": "Microsoft.DocumentDB/databaseAccounts/mongodbDatabases",
       "name": "[concat(parameters('cosmos_database_name'), '/', variables('databaseName'))]",
