@@ -3,7 +3,6 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "siteName": {
-      "defaultValue": "[concat('ACMS', uniqueString(resourceGroup().name, utcNow('F')))]",
       "type": "String"
     },
     "azure_active_directory_app_registration_id": {
@@ -14,7 +13,7 @@
       "type": "String"
     },
     "app_service_plan_subscription": {
-      "defaultValue": "[concat('LinuxPlan-', uniqueString(resourceGroup().name, utcNow('F')))]",
+      "defaultValue": "LinuxPlan-ACMS",
       "type": "String"
     },
     "telemetry_opt_in": {
