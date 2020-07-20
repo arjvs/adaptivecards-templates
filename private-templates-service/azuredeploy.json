@@ -2,7 +2,7 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "sites_adaptivecms_name": {
+    "siteName": {
       "defaultValue": "[concat('ACMS', uniqueString(resourceGroup().name, utcNow('F')))]",
       "type": "String"
     },
@@ -43,7 +43,7 @@
   "resources": [
     {
       "apiVersion": "2018-11-01",
-      "name": "[parameters('sites_adaptivecms_name')]",
+      "name": "[parameters('siteName')]",
       "type": "Microsoft.Web/sites",
       "location": "[parameters('siteLocation')]",
       "kind": "app,linux,container",
@@ -59,11 +59,11 @@
           "name": "appsettings",
           "type": "config",
           "dependsOn": [
-            "[concat('Microsoft.Web/Sites/', parameters('sites_adaptivecms_name'))]"
+            "[concat('Microsoft.Web/Sites/', parameters('siteName'))]"
           ],
           "properties": {
             "ACMS_DB_CONNECTION": "[listConnectionStrings(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmos_database_name')), '2015-04-08').connectionStrings[0].connectionString]",
-            "ACMS_REDIRECT_URI": "[concat('https://', parameters('sites_adaptivecms_name'), '.azurewebsites.net/')]",
+            "ACMS_REDIRECT_URI": "[concat('https://', parameters('siteName'), '.azurewebsites.net/')]",
             "ACMS_APP_ID": "[parameters('azure_active_directory_app_registration_id')]",
             "WEBSITES_ENABLE_APP_SERVICE_STORAGE": "false",
             "DOCKER_REGISTRY_SERVER_URL": "[variables('docker_registry_server_url')]",
@@ -92,10 +92,10 @@
     {
       "type": "Microsoft.Web/sites/config",
       "apiVersion": "2018-11-01",
-      "name": "[concat(parameters('sites_adaptivecms_name'), '/web')]",
+      "name": "[concat(parameters('siteName'), '/web')]",
       "location": "[parameters('siteLocation')]",
       "dependsOn": [
-        "[resourceId('Microsoft.Web/sites', parameters('sites_adaptivecms_name'))]"
+        "[resourceId('Microsoft.Web/sites', parameters('siteName'))]"
       ],
       "properties": {
         "numberOfWorkers": 1,
