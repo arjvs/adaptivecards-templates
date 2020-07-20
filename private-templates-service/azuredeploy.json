@@ -3,7 +3,7 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "sites_adaptivecms_name": {
-      "defaultValue": "adaptivecmsdeploy",
+      "defaultValue": "[concat('ACMS', uniqueString(resourceGroup().name, utcNow('F')))]",
       "type": "String"
     },
     "azure_active_directory_app_registration_id": {
@@ -14,6 +14,7 @@
       "type": "String"
     },
     "app_service_plan_subscription": {
+      "defaultValue": "[concat('LinuxPlan-', uniqueString(resourceGroup().name, utcNow('F')))]",
       "type": "String"
     },
     "telemetry_opt_in": {
@@ -35,7 +36,7 @@
     "linuxFxVersion": "DOCKER|gracez72/acms:1.0",
     "appInsightsInstrumentationKey": "931c613f-fdcb-40a9-bd39-314ce31bc5d6",
     "skuCode": "S1",
-    "hostingPlanNameLinux": "plan-linux-ACMS",
+    "hostingPlanNameLinux": "[parameters('app_service_plan_subscription')]",
     "databaseName": "acms",
     "docker_registry_server_url": "https://index.docker.io"
   },
@@ -86,7 +87,7 @@
       },
       "properties": {
         "name": "[variables('hostingPlanNameLinux')]",
-        "numberOfWorkers": "1",
+        "numberOfWorkers": 1,
         "reserved": true
       }
     },
