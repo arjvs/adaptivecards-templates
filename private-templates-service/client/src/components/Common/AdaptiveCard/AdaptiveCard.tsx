@@ -60,7 +60,7 @@ export function renderAdaptiveCard(template: Template, hostConfig?: any): any {
 // bindData binds the data to the adaptive card template
 function bindData(temp: TemplateInstance): TemplateInstance {
   let template: ACData.Template = new ACData.Template(temp.json);
-  let context: ACData.EvaluationContext = new ACData.EvaluationContext();
+  let context: ACData.IEvaluationContext = { $root: "" };
   if (temp.data && temp.data[0]) {
     context.$root = temp.data[0];
   }

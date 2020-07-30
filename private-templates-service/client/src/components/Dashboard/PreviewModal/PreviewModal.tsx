@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import { withRouter, RouteComponentProps } from 'react-router-dom';
 import { TooltipHost } from 'office-ui-fabric-react';
 import { SpinnerSize } from 'office-ui-fabric-react/lib/Spinner';
-import CortanaSkills from 'adaptivecards-designer/lib/hostConfigs/cortana-skills.json';
+import CortanaSkills from 'adaptivecards-designer/lib/hostConfigs/cortana-skills-classic.json';
 import TeamsDark from 'adaptivecards-designer/lib/hostConfigs/microsoft-teams-dark.json';
 import TeamsLight from 'adaptivecards-designer/lib/hostConfigs/microsoft-teams-light.json';
 import OutlookDesktop from 'adaptivecards-designer/lib/hostConfigs/outlook-desktop.json';

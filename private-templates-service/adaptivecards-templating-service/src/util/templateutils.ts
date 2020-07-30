@@ -174,7 +174,7 @@ export function parseToken(token: string): string {
 export function createCard(template: JSON, data: JSON): JSON {
   try {
     let dataTemplate: ACData.Template = new ACData.Template(template);
-    let context: ACData.EvaluationContext = new ACData.EvaluationContext();
+    let context: ACData.IEvaluationContext = { $root: "" };
     context.$root = data;
     let card: JSON = dataTemplate.expand(context);
     return card;
