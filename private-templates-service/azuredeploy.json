@@ -1,9 +1,8 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "sites_adaptivecms_name": {
-      "defaultValue": "adaptivecmsdeploy",
+    "siteName": {
       "type": "String"
     },
     "azure_active_directory_app_registration_id": {
@@ -14,6 +13,7 @@
       "type": "String"
     },
     "app_service_plan_subscription": {
+      "defaultValue": "LinuxPlan-ACMS",
       "type": "String"
     },
     "telemetry_opt_in": {
@@ -34,18 +34,23 @@
   "variables": {
     "linuxFxVersion": "DOCKER|gracez72/acms:1.0",
     "appInsightsInstrumentationKey": "931c613f-fdcb-40a9-bd39-314ce31bc5d6",
+    "skuCode": "S1",
+    "hostingPlanNameLinux": "[parameters('app_service_plan_subscription')]",
     "databaseName": "acms",
     "docker_registry_server_url": "https://index.docker.io"
   },
   "resources": [
     {
-      "type": "Microsoft.Web/sites",
       "apiVersion": "2018-11-01",
-      "name": "[parameters('sites_adaptivecms_name')]",
+      "name": "[parameters('siteName')]",
+      "type": "Microsoft.Web/sites",
       "location": "[parameters('siteLocation')]",
       "kind": "app,linux,container",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms/', variables('hostingPlanNameLinux'))]"
+      ],
       "properties": {
-        "serverFarmId": "[parameters('app_service_plan_subscription')]"
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', variables('hostingPlanNameLinux'))]"
       },
       "resources": [
         {
@@ -53,11 +58,11 @@
           "name": "appsettings",
           "type": "config",
           "dependsOn": [
-            "[concat('Microsoft.Web/Sites/', parameters('sites_adaptivecms_name'))]"
+            "[concat('Microsoft.Web/Sites/', parameters('siteName'))]"
           ],
           "properties": {
             "ACMS_DB_CONNECTION": "[listConnectionStrings(resourceId('Microsoft.DocumentDB/databaseAccounts', parameters('cosmos_database_name')), '2015-04-08').connectionStrings[0].connectionString]",
-            "ACMS_REDIRECT_URI": "[concat('https://', parameters('sites_adaptivecms_name'), '.azurewebsites.net/')]",
+            "ACMS_REDIRECT_URI": "[concat('https://', parameters('siteName'), '.azurewebsites.net/')]",
             "ACMS_APP_ID": "[parameters('azure_active_directory_app_registration_id')]",
             "WEBSITES_ENABLE_APP_SERVICE_STORAGE": "false",
             "DOCKER_REGISTRY_SERVER_URL": "[variables('docker_registry_server_url')]",
@@ -67,13 +72,29 @@
         }
       ]
     },
+
+    {
+      "apiVersion": "2018-02-01",
+      "name": "[variables('hostingPlanNameLinux')]",
+      "type": "Microsoft.Web/serverfarms",
+      "location": "[parameters('siteLocation')]",
+      "kind": "linux",
+      "sku": {
+        "Name": "[variables('skuCode')]"
+      },
+      "properties": {
+        "name": "[variables('hostingPlanNameLinux')]",
+        "numberOfWorkers": 1,
+        "reserved": true
+      }
+    },
     {
       "type": "Microsoft.Web/sites/config",
       "apiVersion": "2018-11-01",
-      "name": "[concat(parameters('sites_adaptivecms_name'), '/web')]",
+      "name": "[concat(parameters('siteName'), '/web')]",
       "location": "[parameters('siteLocation')]",
       "dependsOn": [
-        "[resourceId('Microsoft.Web/sites', parameters('sites_adaptivecms_name'))]"
+        "[resourceId('Microsoft.Web/sites', parameters('siteName'))]"
       ],
       "properties": {
         "numberOfWorkers": 1,
@@ -136,6 +157,7 @@
         "reservedInstanceCount": 0
       }
     },
+
     {
       "type": "Microsoft.DocumentDB/databaseAccounts",
       "name": "[parameters('cosmos_database_name')]",
@@ -169,6 +191,7 @@
         "disableKeyBasedMetadataWriteAccess": false
       }
     },
+
     {
       "type": "Microsoft.DocumentDB/databaseAccounts/mongodbDatabases",
       "name": "[concat(parameters('cosmos_database_name'), '/', variables('databaseName'))]",
