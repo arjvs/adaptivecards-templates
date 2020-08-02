@@ -72,7 +72,6 @@
         }
       ]
     },
-
     {
       "apiVersion": "2018-02-01",
       "name": "[variables('hostingPlanNameLinux')]",
@@ -157,7 +156,6 @@
         "reservedInstanceCount": 0
       }
     },
-
     {
       "type": "Microsoft.DocumentDB/databaseAccounts",
       "name": "[parameters('cosmos_database_name')]",
@@ -191,7 +189,6 @@
         "disableKeyBasedMetadataWriteAccess": false
       }
     },
-
     {
       "type": "Microsoft.DocumentDB/databaseAccounts/mongodbDatabases",
       "name": "[concat(parameters('cosmos_database_name'), '/', variables('databaseName'))]",
