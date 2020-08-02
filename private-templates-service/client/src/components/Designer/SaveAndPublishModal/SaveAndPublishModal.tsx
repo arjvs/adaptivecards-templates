@@ -33,6 +33,7 @@ import {
 import { Container, ACWrapper, TemplateFooterWrapper, TemplateName, TemplateStateWrapper } from '../../AdaptiveCardPanel/styled';
 import { StatusIndicator, Status, TagsWrapper } from '../../Dashboard/PreviewModal/TemplateInfo/styled';
 import { getVersionNumber } from '../../../utils/TemplateUtil/TemplateUtil';
+import AdaptiveCard from '../../Common/AdaptiveCard/AdaptiveCard';
 
 interface Props {
   designerTemplateJSON: object;
@@ -128,7 +129,8 @@ class SaveAndPublishModal extends React.Component<Props, State> {
     });
     adaptiveCard.parse(this.props.designerTemplateJSON);
     let renderedCard = adaptiveCard.render();
-
+    let _template: Template = this.props.template ? this.props.template : new Template();
+    let _version: string = this.props.templateVersion ? this.props.templateVersion : "1.0";
     return (
       <BackDrop>
         <Modal aria-label={STRINGS.SAVE_AND_PUBLISH_CARD}>
@@ -143,11 +145,7 @@ class SaveAndPublishModal extends React.Component<Props, State> {
             <CenterPanelLeft>
               <Container style={{ margin: "0 80px 24px 0" }} >
                 <ACWrapper>
-                  <Card ref={n => {
-                    // Work around for known issue: https://github.com/gatewayapps/react-adaptivecards/issues/10
-                    n && n.firstChild && n.removeChild(n.firstChild);
-                    n && n.appendChild(renderedCard);
-                  }} />
+                  <AdaptiveCard cardtemplate={_template} templateVersion={_version} hostConfig={adaptiveCard.hostConfig} />
                 </ACWrapper>
                 <TemplateFooterWrapper style={{ justifyContent: "space-between", paddingRight: "20px" }}>
                   <TemplateName>{this.props.templateName ? this.props.templateName : STRINGS.UNTITLEDCARD}</TemplateName>

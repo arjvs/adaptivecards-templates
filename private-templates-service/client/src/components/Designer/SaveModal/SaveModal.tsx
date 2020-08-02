@@ -7,7 +7,7 @@ import { closeModal } from '../../../store/page/actions';
 import { TagsState } from '../../../store/tags/types';
 import { addFavoriteTags, removeFavoriteTags, getAllTags } from '../../../store/tags/actions';
 import { updateTemplate } from '../../../store/currentTemplate/actions';
-import { PostedTemplate } from 'adaptive-templating-service-typescript-node';
+import { PostedTemplate, Template } from 'adaptive-templating-service-typescript-node';
 import * as AdaptiveCards from "adaptivecards";
 import Tags from '../../Common/Tags';
 
@@ -30,9 +30,10 @@ import {
 } from './styled';
 
 import { UNTITLEDCARD, SAVETEXT, DRAFT, SAVE, CANCEL, SAVECARD, CARDNAME, TAGS, MYCARD } from '../../../assets/strings';
-
+import AdaptiveCard from '../../Common/AdaptiveCard/AdaptiveCard';
 const mapStateToProps = (state: RootState) => {
   return {
+    template: state.currentTemplate.template,
     templateID: state.currentTemplate.templateID,
     templateJSON: state.currentTemplate.templateJSON,
     templateName: state.currentTemplate.templateName,
@@ -43,6 +44,7 @@ const mapStateToProps = (state: RootState) => {
 }
 
 interface Props {
+  template?: Template;
   templateID?: string;
   templateName?: string;
   sampleDataJSON?: object;
@@ -124,7 +126,8 @@ class SaveModal extends React.Component<Props, State> {
     });
     adaptiveCard.parse(this.props.designerTemplateJSON);
     let renderedCard = adaptiveCard.render();
-
+    let _template: Template = this.props.template ? this.props.template : new Template();
+    let _version: string = this.props.version ? this.props.version : "1.0";
     let modalTitle = "saveModalTitle";
 
     let favoriteTags: string[] = [];
@@ -142,11 +145,7 @@ class SaveModal extends React.Component<Props, State> {
             <MiddleRowWrapper>
               <Container style={{ margin: "0 80px 24px 0" }} >
                 <ACWrapper>
-                  <Card ref={n => {
-                    // Work around for known issue: https://github.com/gatewayapps/react-adaptivecards/issues/10
-                    n && n.firstChild && n.removeChild(n.firstChild);
-                    n && n.appendChild(renderedCard);
-                  }} />
+                  <AdaptiveCard cardtemplate={_template} templateVersion={_version} hostConfig={adaptiveCard.hostConfig} />
                 </ACWrapper>
                 <TemplateFooterWrapper style={{ justifyContent: "space-between", paddingRight: "20px" }}>
                   <TemplateName>{UNTITLEDCARD}</TemplateName>

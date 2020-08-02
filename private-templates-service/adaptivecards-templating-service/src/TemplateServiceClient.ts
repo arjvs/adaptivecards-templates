@@ -6,11 +6,13 @@ import { StorageProvider } from ".";
 import { ITemplate, JSONResponse, ITemplateInstance, IUser } from ".";
 import { SortBy, SortOrder, TemplatePreview, TemplateState, TemplateInstancePreview, TagList, TemplateStateRequest } from "./models/models";
 import { updateTemplateToLatestInstance, getTemplateVersion, isValidJSONString, setTemplateInstanceParam, incrementVersion, anyVersionsLive, sortTemplateByVersion, parseToken, getMostRecentVersion, checkValidTemplateState, incrementVersionStr, createCard } from "./util/templateutils";
-import logger from "./util/logger"
+import logger from "./util/logger";
+import * as ACData from "adaptivecards-templating";
 
 export class TemplateServiceClient {
   private storageProvider: StorageProvider;
   private authProvider: AuthenticationProvider;
+
 
   /**
    * @public
@@ -1360,7 +1362,53 @@ export class TemplateServiceClient {
         res.status(200).json({ templates: response.result });
       });
     });
-
+    router.post("/getAdaptiveCardById", async (req: Request, res: Response, _next: NextFunction) => {
+      let token = parseToken(req.headers.authorization!);
+      if (req.body.data !== undefined &&
+        (!(req.body.data instanceof Object) ||
+          !isValidJSONString(JSON.stringify(req.body.data)))
+      ) {
+        const err = new TemplateError(
+          ApiError.InvalidTemplate,
+          `Template must be valid JSON.`
+        );
+        return res.status(400).json({ error: err });
+      }
+      this.getTemplates(
+        token,
+        req.body.TemplateId,
+        undefined,
+        undefined,
+        req.body.version,
+        undefined,
+        undefined,
+        undefined,
+        undefined,
+        false
+      ).then((response) => {
+        if (!response.success ||
+          (response.result && response.result.length === 0)) {
+          const err = new TemplateError(
+            ApiError.TemplateNotFound,
+            `Template with id ${req.params.id} does not exist.`
+          );
+          return res.status(404).json({ error: err });
+        }
+        let temp = response.result?.[0].instances?.[0];
+        let template: ACData.Template = new ACData.Template(temp?.json);
+        let context: ACData.IEvaluationContext = { $root: "" };
+        if (req.body.data) {
+          try {
+            context.$root = req.body.data;
+            let card = template.expand(context);
+            return res.status(200).send(card);
+          } catch (e) {
+            return res.status(404).json({ error: "Error parsing data: " + e });
+          }
+        }
+        return res.status(404).json({ error: "Invalid data" });
+      });
+    });
     router.post("/:id?", async (req: Request, res: Response, _next: NextFunction) => {
       let token = parseToken(req.headers.authorization!);
       if (req.body.template !== undefined && (!(req.body.template instanceof Object) || !isValidJSONString(JSON.stringify(req.body.template)))) {
